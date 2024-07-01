@@ -1,6 +1,8 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
+  LoggerService,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -8,12 +10,15 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma/prisma.service';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {}
 
   private async hashPassword(password: string) {
@@ -22,7 +27,9 @@ export class AuthService {
   }
 
   async register(registerDto: CreateAuthDto) {
+    this.logger.log(`Attempting to register user: ${registerDto.email}`);
     if (registerDto.password !== registerDto.confirmPassword) {
+      this.logger.warn('Password and confirm password do not match');
       throw new UnprocessableEntityException('As senhas não conferem');
     }
 
@@ -39,17 +46,21 @@ export class AuthService {
         password: hashedPassword,
       },
     });
+    this.logger.log(`User registered successfully: ${user.email}`);
     return user;
   }
 
   async login(loginDto: UpdateAuthDto) {
+    this.logger.log(`Attempting to login user: ${loginDto.email}`);
+
     const user = await this.findOneWithEmail(loginDto.email);
-    console.log('user', user);
     if (!user || !(await bcrypt.compare(loginDto.password, user.password))) {
+      this.logger.warn('Invalid credentials provided');
       throw new Error('Senha Inválida');
     }
 
     const token = this.jwtService.sign({ userId: user.id });
+    this.logger.log(`User logged in successfully: ${user.email}`);
     return { token };
   }
 

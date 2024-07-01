@@ -12,6 +12,8 @@ import {
   Res,
   UsePipes,
   ValidationPipe,
+  Inject,
+  LoggerService,
 } from '@nestjs/common';
 import { ShortUrlService } from './short-url.service';
 import { CreateShortUrlDto } from './dto/create-short-url.dto';
@@ -25,11 +27,16 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @ApiTags('Short URL')
 @Controller()
 export class ShortUrlController {
-  constructor(private readonly shortUrlService: ShortUrlService) {}
+  constructor(
+    private readonly shortUrlService: ShortUrlService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
+  ) {}
 
   @UseGuards(OptionalAuthGuard)
   @Post('shorten')
@@ -40,10 +47,12 @@ export class ShortUrlController {
     @Body() createShortUrlDto: CreateShortUrlDto,
     @Request() req,
   ): Promise<any> {
+    this.logger.log('Handling shorten URL request');
     const url = await this.shortUrlService.shortenUrl(
       createShortUrlDto.originalUrl,
       req.user?.userId,
     );
+    this.logger.log(`URL encurtada: ${url.shortUrl}`);
     return { message: 'URL encurtada com sucesso', shortUrl: url.shortUrl };
   }
 
@@ -57,6 +66,7 @@ export class ShortUrlController {
     @Param('shortUrlId') shortUrlId: string,
     @Res() res: Response,
   ): Promise<any> {
+    this.logger.log(`Handling redirect request for short URL: ${shortUrlId}`);
     const originalUrl = await this.shortUrlService.findOriginalUrl(shortUrlId);
     res.redirect(originalUrl);
   }
@@ -67,6 +77,7 @@ export class ShortUrlController {
   @ApiOperation({ summary: 'Listar URLs encurtadas pelo usuário' })
   @ApiResponse({ status: 200, description: 'Listagem de URLs encurtadas' })
   async listUserUrls(@Request() req): Promise<any> {
+    this.logger.log(`Listing URLs for user: ${req.user.userId}`);
     const urls = await this.shortUrlService.listUserUrls(req.user.userId);
     return { urls };
   }
@@ -82,11 +93,13 @@ export class ShortUrlController {
     @Body() updateShortUrlDto: UpdateShortUrlDto,
     @Request() req,
   ): Promise<any> {
+    this.logger.log(`Updating URL: ${urlId} for user: ${req.user.userId}`);
     const url = await this.shortUrlService.updateUserUrl(
       req.user.userId,
       urlId,
       updateShortUrlDto.newOriginalUrl,
     );
+    this.logger.log(`URL atualizada com sucesso: ${url.shortUrl}`);
     return { message: 'URL atualizada com sucesso', url };
   }
 
@@ -99,6 +112,7 @@ export class ShortUrlController {
     @Param('urlId') urlId: string,
     @Request() req,
   ): Promise<any> {
+    this.logger.log(`Deleting URL: ${urlId} for user: ${req.user.userId}`);
     const url = await this.shortUrlService.deleteUserUrl(
       req.user.userId,
       urlId,
