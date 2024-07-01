@@ -6,6 +6,7 @@ import { UpdateShortUrlDto } from './dto/update-short-url.dto';
 import { NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 describe('ShortUrlController', () => {
   let shortUrlController: ShortUrlController;
@@ -28,6 +29,12 @@ describe('ShortUrlController', () => {
           provide: JwtService,
           useValue: {
             sign: jest.fn().mockReturnValue('token-jwt'),
+          },
+        },
+        {
+          provide: WINSTON_MODULE_NEST_PROVIDER,
+          useValue: {
+            log: jest.fn(),
           },
         },
       ],

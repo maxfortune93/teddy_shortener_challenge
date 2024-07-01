@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { Url } from '@prisma/client';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 describe('ShortUrlService', () => {
   let shortUrlService: ShortUrlService;
@@ -28,6 +29,13 @@ describe('ShortUrlService', () => {
         ShortUrlService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: JwtService, useValue: mockJwtService },
+        {
+          provide: WINSTON_MODULE_NEST_PROVIDER,
+          useValue: {
+            log: jest.fn(),
+            warn: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

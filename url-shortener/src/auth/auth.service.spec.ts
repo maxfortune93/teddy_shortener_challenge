@@ -9,6 +9,7 @@ import {
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import * as bcrypt from 'bcrypt';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -33,6 +34,13 @@ describe('AuthService', () => {
         AuthService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: JwtService, useValue: mockJwtService },
+        {
+          provide: WINSTON_MODULE_NEST_PROVIDER,
+          useValue: {
+            log: jest.fn(),
+            warn: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

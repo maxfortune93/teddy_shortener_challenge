@@ -8,6 +8,7 @@ import {
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -28,6 +29,12 @@ describe('AuthController', () => {
           provide: JwtService,
           useValue: {
             sign: jest.fn().mockReturnValue('token-jwt'),
+          },
+        },
+        {
+          provide: WINSTON_MODULE_NEST_PROVIDER,
+          useValue: {
+            log: jest.fn(),
           },
         },
       ],
