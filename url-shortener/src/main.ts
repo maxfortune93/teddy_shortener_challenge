@@ -19,7 +19,7 @@ async function bootstrap() {
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(logger);
-  // Adiciona logs de teste
+
   logger.log('Teste de log enviado para Elasticsearch');
   logger.log('Outro teste de log enviado para Elasticsearch');
 

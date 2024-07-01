@@ -3,8 +3,6 @@ import {
   Post,
   Body,
   Get,
-  UseGuards,
-  Request,
   UsePipes,
   ValidationPipe,
   LoggerService,
@@ -13,7 +11,6 @@ import {
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { OptionalAuthGuard } from './guards/optional-auth-guard';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
@@ -46,12 +43,8 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @UseGuards(OptionalAuthGuard)
-  // @UseGuards(JwtGuard)
   @Get()
-  findAll(@Request() req) {
-    const userEmail = req.user;
-    console.log(userEmail);
+  findAll() {
     return this.authService.findAll();
   }
 }

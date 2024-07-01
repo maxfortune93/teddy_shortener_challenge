@@ -9,20 +9,16 @@ services:
       - ./url-shortener:/home/node/app
     # entrypoint: sh -c "npm install && npm run start:dev"
     entrypoint: ["sh", "-c", "npm install && nodemon --watch src --exec 'npm run start:dev'"]
-    # depends_on:
-    #   - elasticsearch
     depends_on:
       elasticsearch:
         condition: service_healthy
-
-      
-
 
   db:
     image: mysql:8.0.30-debian
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=db_url_shortener
+      
     ports:
       - 3306:3306
     volumes:
@@ -58,12 +54,3 @@ volumes:
     driver: local
   es_data:
     driver: local
-
-  # prisma-studio:
-  #     image: node:20-slim
-  #     working_dir: /home/node/app
-  #     volumes:
-  #       - ./url-shortener:/home/node/app
-  #     entrypoint: ["sh", "-c", "npm install && npx prisma studio"]
-  #     depends_on:
-  #       - db

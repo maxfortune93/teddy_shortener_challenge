@@ -5,10 +5,12 @@ import {
 import * as winston from 'winston';
 import { ElasticsearchTransport } from 'winston-elasticsearch';
 
+const ELASTICSEARCH_URL = process.env.ELASTICSEARCH_URL;
+
 const esTransportOpts = {
   level: 'info',
   clientOpts: {
-    node: 'http://elasticsearch:9200',
+    node: ELASTICSEARCH_URL,
   },
   indexPrefix: 'logstash',
   bufferLimit: 100,

@@ -18,7 +18,6 @@ export class LoggerService {
   private readonly logger: winston.Logger;
 
   constructor() {
-    console.log('entrou aqui no loger');
     this.logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.timestamp(),
