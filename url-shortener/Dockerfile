@@ -7,6 +7,7 @@ RUN apt-get update -y && apt-get install -y openssl procps
 WORKDIR /home/node/app
 
 COPY package*.json ./
+COPY prisma ./prisma/
 
 RUN npm install
 
