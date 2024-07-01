@@ -2,27 +2,50 @@ version: '3'
 
 services:
   url-shortener:
-    build: ./url-shortener
+    container_name: url-shortener
+    build:
+      context: ./url-shortener
+      dockerfile: Dockerfile
+    links:
+      - db
+    depends_on:
+      - db
+      - elasticsearch
     ports:
       - 4000:4000
     volumes:
       - ./url-shortener:/home/node/app
-    # entrypoint: sh -c "npm install && npm run start:dev"
+      - /home/node/app/node_modules
+      - /home/node/app/prisma
     entrypoint: ["sh", "-c", "npm install && nodemon --watch src --exec 'npm run start:dev'"]
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
+    environment:
+      DATABASE_URL: "mysql://root:root@mysql:3306/db_url_shortener" 
 
   db:
+    container_name: mysql
     image: mysql:8.0.30-debian
+    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=db_url_shortener
-      
+      - MYSQL_DATABASE=db_url_shortener   
     ports:
       - 3306:3306
     volumes:
       - mysql_data:/var/lib/mysql  
+
+  prisma:
+    container_name: prisma
+    build:
+      context: ./url-shortener/prisma
+      dockerfile: Dockerfile
+    links:
+      - db
+    depends_on:
+      - db
+    volumes:
+      - /app/prisma  
+    environment:
+      DATABASE_URL: "mysql://root:root@mysql:3306/db_url_shortener"    
       
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.0
@@ -38,7 +61,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.16.0

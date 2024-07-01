@@ -1,5 +1,7 @@
 import {
   ConflictException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   LoggerService,
@@ -56,7 +58,7 @@ export class AuthService {
     const user = await this.findOneWithEmail(loginDto.email);
     if (!user || !(await bcrypt.compare(loginDto.password, user.password))) {
       this.logger.warn('Invalid credentials provided');
-      throw new Error('Senha Inválida');
+      throw new HttpException('Senha Inválida', HttpStatus.UNAUTHORIZED);
     }
 
     const token = this.jwtService.sign({ userId: user.id });
